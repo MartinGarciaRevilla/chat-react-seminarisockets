@@ -22,6 +22,8 @@ const Chat: React.FC = () => {
 
   const socketRef = useRef<Socket | null>(null);
   const chatBodyRef = useRef<HTMLDivElement>(null);
+  const [systemMessages, setSystemMessages] = useState<string[]>([]);
+
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -36,6 +38,14 @@ const Chat: React.FC = () => {
       console.log('Mensaje recibido:', data);
       setMessageList(prev => [...prev, data]);
     });
+
+     socketRef.current.on('user_connected', (data: { message: string }) => {
+    setSystemMessages(prev => [...prev, data.message]);
+  });
+  
+   socketRef.current.on('user_joined_room', (data: { message: string }) => {
+    setSystemMessages(prev => [...prev, data.message]);
+  });
 
     socketRef.current.on('status', (data) => {
       console.debug('Estado recibido:', data);
@@ -57,8 +67,8 @@ const Chat: React.FC = () => {
 
   const joinRoom = () => {    
     if (room) {
-      socketRef.current?.emit('join_room', room);
-      setShowChat(true);
+      socketRef.current?.emit('join_room', { roomId: room, username: user.name });
+            setShowChat(true);
     }
   };
 
@@ -94,6 +104,11 @@ const Chat: React.FC = () => {
         <div className="chat-box">
           <div className="chat-header">Sala: {room}</div>
           <div className="chat-body" ref={chatBodyRef}>
+            {systemMessages.map((msg, index) => (
+              <div key={index} className="system-message">
+                {msg}
+              </div>
+            ))}
             {messageList.map((msg, index) => (
               <div
                 key={index}

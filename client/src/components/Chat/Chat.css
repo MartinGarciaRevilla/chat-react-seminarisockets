@@ -93,3 +93,10 @@
     gap: 8px; /* Reducido */
     align-items: center;
 }
+
+.system-message {
+    text-align: center;
+    color: #2563eb;
+    font-style: italic;
+    margin: 8px 0;
+}
